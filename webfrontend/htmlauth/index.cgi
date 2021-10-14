@@ -35,7 +35,7 @@ our $languagefileplugin;
 our $cache;
 our $savedata;
 our $MSselectlist;
-our $guntamaticKey;
+our $guntamatickey;
 our $miniserver;
 our $msudpport;
 our $enabled;
@@ -72,8 +72,8 @@ foreach (split(/&/,$ENV{"QUERY_STRING"}))
 if ( !$query{'guntamaticip'} )   { if ( param('guntamaticip')  ) { $guntamaticip = quotemeta(param('guntamaticip'));         } 
 else { $guntamaticip = $guntamaticip;  } } else { $guntamaticip = quotemeta($query{'guntamaticip'});   }
 
-if ( !$query{'guntamaticKey'} )   { if ( param('guntamaticKey')  ) { $guntamaticKey = quotemeta(param('guntamaticKey'));         } 
-else { $guntamaticKey = $guntamaticKey;  } } else { $guntamaticKey = quotemeta($query{'guntamaticKey'});   }
+if ( !$query{'guntamatickey'} )   { if ( param('guntamatickey')  ) { $guntamatickey = quotemeta(param('guntamatickey'));         } 
+else { $guntamatickey = $guntamatickey;  } } else { $guntamatickey = quotemeta($query{'guntamatickey'});   }
 
 if ( !$query{'miniserver'} )   { if ( param('miniserver')  ) { $miniserver = quotemeta(param('miniserver'));         } 
 else { $miniserver = $miniserver;  } } else { $miniserver = quotemeta($query{'miniserver'});   }
@@ -105,10 +105,10 @@ if (param('savedata')) {
 
 	if ($localtime ne 1) { $localtime = 0 }
 	
-	$guntamaticKey = encode_entities($guntamaticKey);
-	print STDERR "$guntamaticKey\n";
+	$guntamatickey = encode_entities($guntamatickey);
+	print STDERR "$guntamatickey\n";
 
-	$conf->param('GUNTAMATIC.GUNTAMATICKEY', unquotemeta($guntamaticKey));
+	$conf->param('GUNTAMATIC.GUNTAMATICKEY', unquotemeta($guntamatickey));
 	$conf->param('GUNTAMATIC.GUNTAMATICIP', unquotemeta($guntamaticip));
 	$conf->param('GUNTAMATIC.MINISERVER', unquotemeta($miniserver));
 	$conf->param('GUNTAMATIC.UDPPORT', unquotemeta($msudpport));
@@ -124,7 +124,7 @@ if (param('savedata')) {
 # ---------------------------------------
 $conf = new Config::Simple("$home/config/plugins/$psubfolder/guntamatic.cfg");
 $guntamaticip = encode_entities($conf->param('GUNTAMATIC.GUNTAMATICIP'));
-$guntamaticKey = encode_entities($conf->param('GUNTAMATIC.GUNTAMATICKEY'));
+$guntamatickey = encode_entities($conf->param('GUNTAMATIC.GUNTAMATICKEY'));
 $miniserver = encode_entities($conf->param('GUNTAMATIC.MINISERVER'));
 $msudpport = encode_entities($conf->param('GUNTAMATIC.UDPPORT'));
 $enabled = encode_entities($conf->param('GUNTAMATIC.ENABLED'));

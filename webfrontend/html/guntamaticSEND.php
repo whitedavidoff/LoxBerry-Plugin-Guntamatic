@@ -53,9 +53,12 @@ $miniserverIP = $msArray[$msID]['IPAddress'];
 
 //Neues Guntamatic Objekt anlegen. Username und Passwort werden aus cfg Datei gelesen.
 $session_guntamatic = new guntamatic_api();
-$session_guntamatic->set_auth($guntamaticCfg->get("GUNTAMATIC","GUNTAMATICIP"), $guntamaticCfg->get("GUNTAMATIC","GUNTAMATICKEY"));
+$session_guntamatic->login($guntamaticCfg->get("GUNTAMATIC","USERNAME"), $guntamaticCfg->get("GUNTAMATIC","PASSWORD"));
 
+$mowerlist=$session_guntamatic->get_robot();
 //LOGOK("Data received from Guntamatic Connect API:".json_encode($mowerlist));
+$mower = $mowerlist[0];
+$mowerID= $mower->id;
 
 // Kommando vomMiniserver erhalten welches an den Automower weitergeleitet werden muss
 // Kommandos: "park", "pause", "start3h"
