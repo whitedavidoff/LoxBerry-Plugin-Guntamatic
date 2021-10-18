@@ -9,8 +9,8 @@
 
 # Will be executed as user "loxberry".
 #check if file exists (-e) and is executeable (-x)
-if [ -x REPLACELBPBINDIR/guntatmaticRCVSTAT.php ]
+if [ -x REPLACELBPBINDIR/guntamaticRCVSTAT.php ]
 then
 	cd REPLACELBPBINDIR
-	/usr/bin/php REPLACELBPBINDIR/guntatmaticRCVSTAT.php
+	/usr/bin/php REPLACELBPBINDIR/guntamaticRCVSTAT.php
 fi

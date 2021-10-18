@@ -36,6 +36,7 @@ our $cache;
 our $savedata;
 our $MSselectlist;
 our $guntamatickey;
+our $guntamaticip;
 our $miniserver;
 our $msudpport;
 our $enabled;
@@ -101,8 +102,10 @@ $psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 if (param('savedata')) {
 	$conf = new Config::Simple("$home/config/plugins/$psubfolder/guntamatic.cfg");
 
+	print STDERR "$conf\n";
+	
 	if ($enabled ne 1) { $enabled = 0 }
-
+	
 	if ($localtime ne 1) { $localtime = 0 }
 	
 	$guntamatickey = encode_entities($guntamatickey);
@@ -129,7 +132,6 @@ $miniserver = encode_entities($conf->param('GUNTAMATIC.MINISERVER'));
 $msudpport = encode_entities($conf->param('GUNTAMATIC.UDPPORT'));
 $enabled = encode_entities($conf->param('GUNTAMATIC.ENABLED'));
 $localtime = encode_entities($conf->param('GUNTAMATIC.LOCALTIME'));
-
 
 # ---------------------------------------
 # Set Enabled / Disabled switch

@@ -1,241 +1,261 @@
+#!/usr/bin/php
 <?php
  require_once "loxberry_log.php";
  
-class husqvarna_api {
-
-	protected $url_api_im = 'https://iam-api.dss.husqvarnagroup.net/api/v3/';
-	protected $url_api_track = 'https://amc-api.dss.husqvarnagroup.net/app/v1/';
-	protected $ip;
-	protected $guntamtickey;
-	protected $token;
-	protected $provider;
-	
-	var $automoweractivity= array (
-			  	"UNKNOWN" 				=>0,  // Unbekannt
-				"NOT_APPLICABLE" 		=>1,  // ??
-				"MOWING" 				=>2,  // Mähen
-				"GOING_HOME" 			=>3,  // Fährt zurück zur Ladestation
-				"CHARGING"				=>4,  // Laden
-				"LEAVING"				=>5,  // Verlässt Ladestation
-				"PARKED_IN_CS"			=>6   // Geparkt in der Latestation
-				);
-				
-	var $automowerstate= array (
-			  	"UNKNOWN" 				=>0,  // 
-				"NOT_APPLICABLE" 		=>1,  // 
-				"PAUSED" 				=>2,  // 
-				"IN_OPERATION" 			=>3,  //
-				"WAIT_UPDATING"			=>4,  //
-				"WAIT_POWER_UP"			=>5,  //
-				"RESTRICTED"			=>6,  //
-				"OFF" 					=>7,  //
-				"STOPPED"				=>8,  //
-				"ERROR"					=>10, //
-				"FATAL_ERROR"			=>10, //
-				"ERROR_AT_POWER_UP"		=>10  //
-				);
-
-
-    function login($ip, $guntamtickey)
-	{
+ 	class guntamatic_heater {
+		public $status;
+		public $program;
+		public $kesseltemp;
+		public $co2;
+		public $leistung;
+		public $pufferO;
+		public $pufferU;
+		public $aussentemp;
+		public $warmwasser;
+		public $pumpeHP0;
+		public $asche;
+		public $stoerung;
 		
-        LOGDEB("Calling Logon to Husqvarna API");	
+		public $vorlauf;
 		
-        $this->ip = $ip;
-        $this->guntamtickey = $guntamtickey;
-		$fields["data"]["attributes"]["ip"] = $this->ip;
-		$fields["data"]["attributes"]["guntamtickey"] = $this->guntamtickey;
-		$fields["data"]["type"] = "token";
-		
-		$result = $this->post_api("token", $fields);
-		//LOGOK("Data received from Husqvarna Connect API:".json_encode($result));
-		if ( $result == false )
-	 	{
-	        LOGCRIT("Husqvarna URL not reachable, terminating");
-	        LOGEND("Processing terminated");
-	        return false;
+		function set_Status($n){
+			$this->status = $n;
 		}
-		else
+
+		function set_Program($n){
+			$this->program = $n;
+		}
+
+		function set_Kesseltemp($n){
+			$this->kesseltemp = $n;
+		}
+
+		function set_Co2($n){
+			$this->co2 = $n;
+		}
+
+		function set_Leistung($n){
+			$this->leistung = $n;
+		}
+
+		function set_PufferO($n){
+			$this->pufferO = $n;
+		}
+
+		function set_PufferU($n){
+			$this->pufferU = $n;
+		}
+
+		function set_Aussentemp($n){
+			$this->aussentemp = $n;
+		}
+
+		function set_Warmwasser($n){
+			$this->warmwasser = $n;
+		}
+		
+		function set_PumpeHP0($n){
+			$this->pumpeHP0 = $n;
+		}
+		
+		function set_Asche($n){
+			$this->asche = $n;
+		}
+
+		function set_Stoerung($n){
+			$this->stoerung = $n;
+		}
+
+		function set_Vorlauf($n){
+			$this->vorlauf = $n;
+		}
+	}
+
+	class guntamatic_api {
+		protected $ip;
+		protected $guntamtickey;
+		protected $urlpath;
+		protected $token;
+
+		function set_auth($ip, $guntamtickey)
 		{
-			if ($result->errors !== NULL) 
+			//LOGOK("set_auth start");
+			$this->ip = $ip;
+			$this->guntamtickey = $guntamtickey;
+			$this->urlpath = "http://" . $ip ."/daqdata.cgi?key=" . $guntamtickey;
+		}
+
+		function logout()
+		{
+			return true;
+		}
+		
+		function get_guntamatic()
+		{
+			//LOGOK("get_guntamatic start");
+			$guntamatic = new guntamatic_heater();
+
+			$result = $this->get_html();
+
+			if ( $result == false )
 			{
-				if ($result->errors[0]->code === "invalid.login") 
-				{
-					LOGCRIT("Wrong ip ". $ip . " or key " . $guntamtickey . " for Husqvarna Connect API, terminating");
-				}
-			    else 
-				{
-			    	LOGCRIT("Other Problem in getting access to Husqvarna Connect API, terminating");
-				}
+				LOGCRIT("Guntamatic URL not reachable, terminating");
 				LOGEND("Processing terminated");
 				return false;
 			}
-			else 
+			else
 			{
-				LOGOK("Getting access to Husqvarna Connect API, successfull");   
-			}
-			if ($result == NULL) 
-			{
-				LOGCRIT("No data from Husqvarna Connect API, terminating");
-				LOGEND("Processing terminated");
-				return false;
-			}
-			else {
-				LOGOK("Data from Husqvarna Connect API received");
-			}
+				if ($result->errors !== NULL) 
+				{
+					if ($result->errors[0]->code === "invalid.login") 
+					{
+						LOGCRIT("Wrong username ". $username . " or password " . $password . " for Guntamatic, terminating");
+					}
+					else 
+					{
+						LOGCRIT("Other Problem in getting access to Guntamatic, terminating");
+					}
+					LOGEND("Processing terminated");
+					return false;
+				}
+				else 
+				{
+					LOGOK("Getting access to Guntamatic, successfull");   
+				}
+
+				if ($result == NULL) 
+				{
+					LOGCRIT("No data from Guntamatic, terminating");
+					LOGEND("Processing terminated");
+					return false;
+				}
+				else {
+					LOGOK("Data from Guntamatic received");				
+					//LOGOK("Data: ".$result);	
+					$lines = explode("\n",$result);
+					//LOGOK("after split");	
+					//LOGOK(count($lines));	
+
+					if (count($lines) >= 121) {
+						//LOGOK("count($lines) > 84");	
+
+						$guntamatic->set_Status($lines[0]);
+						$guntamatic->set_Aussentemp($lines[1]);
+						$guntamatic->set_Kesseltemp($lines[3]);
+						$guntamatic->set_Leistung($lines[5]);
+						$guntamatic->set_Co2($lines[8]);
+						$guntamatic->set_PufferO($lines[17]);
+						$guntamatic->set_PufferU($lines[19]);
+						$guntamatic->set_PumpeHP0($lines[20]);
+						$guntamatic->set_Warmwasser($lines[21]);
+						
+						$guntamatic->set_Vorlauf($lines[31]);
+						
+						$guntamatic->set_Program($lines[69]);
+						
+						$guntamatic->set_Stoerung($lines[80]);
+						$guntamatic->set_Asche($lines[85]);
+							
+						// var parts_Guntamatic = $lines[68];
+						// setState('Guntamatic_Kesselfreigabe_68', parts_Guntamatic, true);
+					
+						// var parts_Guntamatic = $lines[71];
+						// setState('Guntamatic_Programm_HK1_71', parts_Guntamatic, true);
+					
+						// var parts_Guntamatic = $lines[79];
+						// setState('Guntamatic_Stoer0_79', parts_Guntamatic, true);
+					
+						// var parts_Guntamatic = $lines[80];
+						// setState('Guntamatic_Stoer1_80', parts_Guntamatic, true);
+					
+					
+						// var parts_Guntamatic = $lines[89];
+						// setState('Guntamatic_BrenstoffzÃ¤hler_89', parts_Guntamatic, true);
+					
+						// var parts_Guntamatic = $lines[90];
+						// setState('Guntamatic_Pufferladung_90', parts_Guntamatic, true);
+					}
+					else{
+						LOGCRIT("Keine Daten empfangen");
+					}
+				}
+			}	
+
+			LOGOK("get_guntamatic finished");	
+			return $guntamatic;
+		}
+		
+		private function get_html()
+		{
+			$content = null;
+			try {
+				$ch = curl_init();
 			
-			$this->token = $result->data->id;
-			$this->provider = $result->data->attributes->provider;
-			return true;
+				// Check if initialization had gone wrong*    
+				if ($ch === false) {
+					LOGCRIT("failed to initialize");
+				}
+			
+				// Better to explicitly set URL
+				curl_setopt($ch, CURLOPT_URL, $this->urlpath);
+				// That needs to be set; content will spill to STDOUT otherwise
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				// Set more options
+				//curl_setopt(/* ... */);
+				
+				//LOGCRIT($this->urlpath);
+					
+				$content = curl_exec($ch);
+			
+				// Check the return value of curl_exec(), too
+				if ($content === false) {
+					LOGCRIT("curlerror: ".curl_error($ch) . "Curlerrno:". curl_errno($ch));
+				}
+			
+				// Check HTTP return code, too; might be something else than 200
+				$httpReturnCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+				if ($httpReturnCode != 200)
+					LOGCRIT("httpReturnCode: ".$httpReturnCode);
+				/* Process $content here */
+			
+			} catch(Exception $e) {
+			
+				LOGCRIT("Curl failed with error #%d: %s");
+				// LOGCRIT(sprintf('Curl failed with error #%d: %s',$e->getCode(), $e->getMessage()),E_USER_ERROR);
+			
+			} finally {
+				// Close curl handle unless it failed to initialize
+				if (is_resource($ch)) {
+					curl_close($ch);
+				}
+			}
+
+			return $content;
 		}
 		
-	}
-
-	private function get_headers($fields = null)
-	{
-		if ( isset($this->token) )
+		function control($mover_id, $command)
 		{
-			$generique_headers = array(
-			   'Content-type: application/json',
-			   'Accept: application/json',
-				'Authorization: Bearer '.$this->token,
-				'Authorization-Provider: '.$this->provider
-			);
-		}
-		else
-		{
-			$generique_headers = array(
-			   'Content-type: application/json',
-			   'Accept: application/json'
-			   );
-		}
-		if ( isset($fields) )
-		{
-			$custom_headers = array('Content-Length: '.strlen(json_encode ($fields)));
-		}
-		else
-		{
-			$custom_headers = array();
-		}
-		return array_merge($generique_headers, $custom_headers);
-	}
-
-	private function post_api($page, $fields = null)
-	{
-		$session = curl_init();
-
-		curl_setopt($session, CURLOPT_URL, $this->url_api_im . $page);
-		curl_setopt($session, CURLOPT_HTTPHEADER, $this->get_headers($fields));
-		curl_setopt($session, CURLOPT_POST, true);
-		curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-		if ( isset($fields) )
-		{
-			curl_setopt($session, CURLOPT_POSTFIELDS, json_encode ($fields));
-		}
-		$json = curl_exec($session);
-		curl_close($session);
-        return json_decode($json);
-	}
-
-	private function get_api($page, $fields = null, $put = null)
-	{
-		$session = curl_init();
-
-		curl_setopt($session, CURLOPT_URL, $this->url_api_track . $page);
-		if ( isset($put) ){ if ($put == true) curl_setopt($session, CURLOPT_CUSTOMREQUEST, 'PUT');}
-		curl_setopt($session, CURLOPT_HTTPHEADER, $this->get_headers($fields));
-		curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-		if ( isset($fields) )
-		{
-			curl_setopt($session, CURLOPT_POSTFIELDS, json_encode($fields));
-		}
-		$json = curl_exec($session);
-		curl_close($session);
-		return json_decode($json);
-	}
-
-	private function del_api($page)
-	{
-		$session = curl_init();
-
-		curl_setopt($session, CURLOPT_URL, $this->url_api_im . $page);
-		curl_setopt($session, CURLOPT_HTTPHEADER, $this->get_headers());
-		curl_setopt($session, CURLOPT_CUSTOMREQUEST, "DELETE");
-		curl_setopt($session, CURLOPT_RETURNTRANSFER, true);
-		$json = curl_exec($session);
-		curl_close($session);
-//		throw new Exception(__('La livebox ne repond pas a la demande de cookie.', __FILE__));
-		return json_decode($json);
-	}
-
-    function logout()
-	{
-		$result = $this->del_api("token/".$this->token);
-		if ( $result !== false )
-		{
-			unset($this->token);
-			unset($this->provider);
-			return true;
-		}
-		return false;
-	}
-	
-	function list_robots()
-	{
-		$list_robot = array();
-		foreach ($this->get_api("mowers") as $robot)
-		{
-			$list_robot[$robot->id] = $robot;
-		}
-		return $list_robot;
-	}
-	
-	function get_robot()
-	{
-		return $this->get_api("mowers");
-	}
-
-	function get_status($mover_id)
-	{
-		
-		return $this->get_api("mowers/".$mover_id."/status");
-	}
-
-	function get_geofence($mover_id)
-	{
-		
-		return $this->get_api("mowers/".$mover_id."/geofence");
-	}
-	
-	function control($mover_id, $command)
-	{
-		switch ($command)
-		{
-			case 'park' :
-			case 'pause':
-			case 'start': 					return $this->get_api("mowers/".$mover_id."/control/".$command, array("period" => 180));
-			              					break;
-			case 'start3h':					return $this->get_api("mowers/".$mover_id."/control/start/override/period", array("period" => 180));
-			              					break;
-			case 'start6h':					return $this->get_api("mowers/".$mover_id."/control/start/override/period", array("period" => 360));
-			              					break;
-			case 'start12h':				return $this->get_api("mowers/".$mover_id."/control/start/override/period", array("period" => 720));
-			              					break;
-			case 'parkuntilnextschedule':	return $this->get_api("mowers/".$mover_id."/control/park/duration/timer", array("period" => 0));
-			              					break;
-			case 'park3h':					return $this->get_api("mowers/".$mover_id."/control/park/duration/timer", array("period" => 180));
-											break;
-			case 'park6h':					return $this->get_api("mowers/".$mover_id."/control/park/duration/timer", array("period" => 360));
-											break;
-			case 'park12h':					return $this->get_api("mowers/".$mover_id."/control/park/duration/timer", array("period" => 720));
+			// switch ($command)
+			// {
+				// case 'park' :
+				// case 'pause':
+				// case 'start': 					return $this->get_html("mowers/".$mover_id."/control/".$command, array("period" => 180));
+												// break;
+				// case 'start3h':					return $this->get_html("mowers/".$mover_id."/control/start/override/period", array("period" => 180));
+												// break;
+				// case 'start6h':					return $this->get_html("mowers/".$mover_id."/control/start/override/period", array("period" => 360));
+												// break;
+				// case 'start12h':				return $this->get_html("mowers/".$mover_id."/control/start/override/period", array("period" => 720));
+												// break;
+				// case 'parkuntilnextschedule':	return $this->get_html("mowers/".$mover_id."/control/park/duration/timer", array("period" => 0));
+												// break;
+				// case 'park3h':					return $this->get_html("mowers/".$mover_id."/control/park/duration/timer", array("period" => 180));
+												// break;
+				// case 'park6h':					return $this->get_html("mowers/".$mover_id."/control/park/duration/timer", array("period" => 360));
+												// break;
+				// case 'park12h':	
+					
+			//	}
 		}
 	}
-	
-	function settings($mover_id, $data = null)
-	{
-		$result = $this->get_api("mowers/".$mover_id."/settings", array("settings" => $data), true);
-		if ($result==NULL) $result->status = "OK";
-		return $result;
-	}
-}
 ?>
