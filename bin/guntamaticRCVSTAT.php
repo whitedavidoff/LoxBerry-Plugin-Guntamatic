@@ -47,9 +47,9 @@
 	$session_guntamatic->set_auth($guntamaticCfg->get("GUNTAMATIC","GUNTAMATICIP"), $guntamaticCfg->get("GUNTAMATIC","GUNTAMATICKEY"));
 
 	$guntamatic=$session_guntamatic->get_guntamatic();
-	//LOGOK("Data received from Guntamatic Connect API:".json_encode($mowerlist));
+	//LOGOK("Data received from Guntamatic:".json_encode($result));
 
-	$result= array ("status" => $guntamatic->status, "program" => $guntamatic->program, "kesseltemp" => $guntamatic->kesseltemp, "co2" => $guntamatic->co2, "leistung" => $guntamatic->leistung,"pufferO" => $guntamatic->pufferO, "pufferU" => $guntamatic->pufferU, "aussentemp" => $guntamatic->aussentemp, "warmwasser" => $guntamatic->warmwasser, "pumpeHP0" => $guntamatic->pumpeHP0, "asche" => $guntamatic->asche, "stoerung" => $guntamatic->stoerung, "vorlauf" => $guntamatic->vorlauf);
+	$result= $guntamatic->Get_ArrayResult();
 
 	$dataToSend = json_encode($result);
 	$session_guntamatic->logout();
