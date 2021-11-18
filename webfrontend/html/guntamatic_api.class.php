@@ -139,8 +139,7 @@
 			return $result;
 		}
 
-		function Get_EinAusToInt($n)
-		{
+		function Get_EinAusToInt($n){
 			if ($n != NULL ){
 				if ($n == "EIN"){
 					return 1;
@@ -149,21 +148,21 @@
 			return 0;
 		}
 
-		function Get_Program($n)
-		{
+		function Get_Program($n){
 			if ($n != NULL){
+				if ( $n == "AUS"){
+					return 0;}
 				if ( $n == "NORMAL"){
-					return 1;
-				}
+					return 1;}
 				if ($n == "HEIZEN"){
-					return 2;
-				}
+					return 2;}
+				if ($n == "STOKERENTL."){
+					return 3;}
 			}
-			return 0;
+			return -1;
 		}
 
-		function Get_Float($n)
-		{
+		function Get_Float($n){
 			if ($n != NULL){
 				return (float)$n;
 				// return floatval($n);
@@ -175,13 +174,21 @@
 		function set_Betrieb($n){
 
 			if ($n != NULL){
-			  if( $n == "NACHLAUF"){
-				$this->betrieb = 2;}
-			if ($n == "REGELUNG"){
-				$this->betrieb = 1;}
+				if ($n == "AUS"){
+					$this->betrieb = 0;}	
+				if ($n == "EIN"){
+					$this->betrieb = 1;}	
+				if ($n == "REGELUNG"){
+					$this->betrieb = 2;}
+				if( $n == "NACHLAUF"){
+					$this->betrieb = 3;}
+				if( $n == "ZÜNDUNG"){
+					$this->betrieb = 4;}
+				if( $n == "START"){
+					$this->betrieb = 5;}
 			}
-			//if ($n == "AUS")
-			$this->betrieb = 0;
+			else{
+			$this->betrieb = -1;}
 		}
 		function set_Program($n){
 			$this->program = $this->Get_Program($n);
