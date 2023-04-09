@@ -76,6 +76,7 @@
 		
 		function Get_ArrayResult(){
 			$result = array ("betrieb" => $this->betrieb, 
+							"program" => $this->program,
 							"kesseltemp" => $this->kesseltemp, 
 							"co2" => $this->co2, 
 							"leistung" => $this->leistung,
@@ -392,7 +393,7 @@
 			$this->urlpath = "http://" . $ip ."/daqdata.cgi?key=" . $guntamtickey;
 			
 			$this->synkessel = "PK002"; // Synonym bei Powerchip/Powercorn/Biocom/Pro: PK002 - Synonym bei Therm/Biostar: K0010
-			$this->urlcommandpath = "http://" . $ip ."/parset.cgi?key=" . $guntamtickey;
+			$this->urlcommandpath = "http://" . $ip ."/ext/parset.cgi?key=" . $guntamtickey;
 		}
 
 		function logout()
